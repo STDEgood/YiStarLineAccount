@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>YiStarLine Notes · 接入示例</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css?v=1.1.0">
+</head>
+<body>
+<div class="demo-page">
+  <header class="demo-top">
+    <div class="demo-logo">
+      <span class="app-ico">YN</span>
+      <div>YiStarLine Notes
+        <div class="dim" style="font-size:11px;font-weight:400">示例产品 · 已接入 YiStarLine Account</div>
+      </div>
+    </div>
+    <div class="row" style="gap:8px">
+      <span class="badge" id="sso-badge"><span class="dot"></span>检测服务中…</span>
+      <a class="btn btn-sm" href="/" target="_blank" rel="noopener">打开管理界面</a>
+    </div>
+  </header>
+
+  <div class="demo-wrap">
+    <section class="demo-hero">
+      <h1>示例产品</h1>
+      <p>这是一个接入 YiStarLine Account 的最小产品，用来演示「一键快速登录」与「账户密码登录」两条链路。</p>
+    </section>
+
+    <section class="demo-card" id="loading-card">
+      <p class="muted" style="font-size:12px">正在读取登录状态…</p>
+    </section>
+
+    <section class="demo-card hidden" id="login-card">
+      <div class="demo-login-box">
+        <span class="badge accent">未登录</span>
+        <h2 style="font-size:16px">使用 YiStarLine Account 登录</h2>
+        <p class="muted" style="font-size:12px;max-width:46ch;line-height:1.6">如果本机已登录管理界面，点击后会直接返回，无需再次输入密码。</p>
+        <button class="btn btn-primary" id="quick-login" style="height:36px;padding:0 18px">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7z"/></svg>
+          一键快速登录
+        </button>
+        <div class="dim" style="font-size:11px">—— 或使用账户密码 ——</div>
+        <form id="password-form" style="display:grid;gap:8px;width:100%;max-width:300px">
+          <input class="input" name="username" placeholder="用户名" autocomplete="username" required>
+          <input class="input" name="password" type="password" placeholder="密码" autocomplete="current-password" required>
+          <button class="btn" type="submit">使用账户密码登录</button>
+        </form>
+        <p class="dim" style="font-size:11px">示例产品通过 <span class="mono">POST /api/v1/auth/login</span> 完成校验</p>
+        <div class="alert bad hidden" id="demo-error" style="width:100%"></div>
+      </div>
+    </section>
+
+    <section class="demo-card hidden" id="profile-card">
+      <div class="row-between">
+        <div class="demo-profile">
+          <span class="avatar lg" id="profile-avatar">?</span>
+          <div class="who">
+            <h3 id="profile-name">—</h3>
+            <p id="profile-meta">—</p>
+          </div>
+        </div>
+        <div class="row" style="gap:6px">
+          <button class="btn btn-sm" id="refresh-profile">刷新资料</button>
+          <button class="btn btn-sm btn-outline-danger" id="logout">退出登录</button>
+        </div>
+      </div>
+      <div class="grid-3" style="margin-top:16px;gap:10px">
+        <div class="card" style="padding:12px"><div class="dim" style="font-size:10.5px;text-transform:uppercase;letter-spacing:.08em">用户名</div><div class="mono" id="profile-username" style="margin-top:4px">—</div></div>
+        <div class="card" style="padding:12px"><div class="dim" style="font-size:10.5px;text-transform:uppercase;letter-spacing:.08em">邮箱</div><div id="profile-email" style="margin-top:4px;font-size:12px">—</div></div>
+        <div class="card" style="padding:12px"><div class="dim" style="font-size:10.5px;text-transform:uppercase;letter-spacing:.08em">令牌到期</div><div id="profile-exp" style="margin-top:4px;font-size:12px">—</div></div>
+      </div>
+      <div class="alert ok" style="margin-top:14px">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        <div>登录成功。身份来自本机 YiStarLine Account，示例产品后端已用票据兑换访问令牌。</div>
+      </div>
+    </section>
+
+    <section class="demo-card">
+      <h3 style="font-size:13px">这个页面做了什么</h3>
+      <ul class="demo-steps">
+        <li><span class="step-num">1</span><div><b>打开授权窗口</b>：调用 <span class="mono">YLAccount.login({ appId, redirectUri })</span>，窗口指向 <span class="mono">/sso/authorize</span>。</div></li>
+        <li><span class="step-num">2</span><div><b>已登录则直接放行</b>：服务端签发票据，并 302 回 <span class="mono">/demo/callback?ticket=…&amp;state=…</span>。</div></li>
+        <li><span class="step-num">3</span><div><b>后端兑换身份</b>：示例产品用应用密钥调用 <span class="mono">/api/v1/ticket/redeem</span>，拿到用户资料与访问令牌。</div></li>
+        <li><span class="step-num">4</span><div><b>写入产品会话</b>：本示例用 HttpOnly Cookie 保存访问令牌，刷新页面仍是登录态。</div></li>
+      </ul>
+      <div class="row-between" style="margin-top:14px">
+        <p class="dim" style="font-size:11px">示例应用 ID：<span class="mono" id="demo-app-id">—</span></p>
+        <a class="btn btn-sm" href="/#/developer">查看接入文档</a>
+      </div>
+    </section>
+  </div>
+</div>
+<script src="/yl-sso.js?v=1.1.0"></script>
+<script src="/demo/demo.js?v=1.1.0"></script>
+</body>
+</html>

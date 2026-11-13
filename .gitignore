@@ -1,0 +1,39 @@
+# 运行期数据（含账户库与本机密钥，绝不能提交）
+data/
+logs/
+dist/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# 测试与本地状态
+.testhome/
+tests/.seed.json
+.pytest_cache/
+
+# Android 构建产物与签名
+android/build/
+android/out/
+android/keystore/
+*.jks
+*.keystore
+*.idsig
+
+# 桌面端临时产物
+desktop/bin/
+desktop/obj/
+*.pdb
+*.user
+
+# 编辑器 / 系统
+.vs/
+.idea/
+.vscode/
+Thumbs.db
+desktop.ini
+.DS_Store
